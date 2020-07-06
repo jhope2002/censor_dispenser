@@ -38,10 +38,10 @@ def censor_email(email_to_censor, phrases=None, words=None):
         else:
             return None
 
-    censored_email = email_to_censor
-    split_email = email_to_censor.split()  
+    censored_email = email_to_censor     
     #print(split_email)
-    possible_phrases = find_possible(phrases)    
+    possible_phrases = find_possible(phrases)
+    #print(possible_phrases)    
     possible_words = find_possible(words)   
     #print(possible_words)
         
@@ -66,7 +66,7 @@ def censor_email(email_to_censor, phrases=None, words=None):
     
 
 #email_one_censored = censor_email(email_one, phrases=phrases_to_censor)
-#print(eamil_one)
+#print(email_one)
 #print(email_one_censored)
 
 #email_two_censored = censor_email(email_two, phrases=phrases_to_censor)
@@ -76,6 +76,77 @@ def censor_email(email_to_censor, phrases=None, words=None):
 #email_three_censored = censor_email(email_three, phrases=phrases_to_censor, words=negative_words)
 #print(email_three)
 #print(email_three_censored)
+
+def censor_email_extreme(email_to_censor, phrases=None, words=None):
+
+    def create_censor_bar(phrase):
+        censor_bar_list = ['X' for character in phrase]        
+        if phrase[-1] in punctuation:
+            censor_bar_list[-1] = phrase[-1]        
+        censor_bar = ''.join(censor_bar_list)        
+        return censor_bar    
+
+    def find_possible(word_list=None):
+        if word_list:
+            possible_words = []
+            for word in word_list:            
+                possible_words.append(word)
+                word_title = word[0].upper() + word[1:]                
+                possible_words.append(word_title)
+                word_upper = word.upper()
+                possible_words.append(word_upper)
+                for character in punctuation:                    
+                    possible_words.append(word + character)                      
+                    possible_words.append(word_title + character) 
+                    possible_words.append(word_upper + character)            
+            possible_words.sort(key = len, reverse = True)    
+            return possible_words
+        else:
+            return None
+
+    email_list = email_to_censor.split()    
+    censored_email_list = email_to_censor.split()
+    #print("Censored Email List:")
+    #print(censored_email_list)
+    possible_phrases = find_possible(phrases)    
+    #print("Possible Phrases:")
+    #print(possible_phrases)
+    possible_words = find_possible(words)   
+    #print("Possible words:")
+    #print(possible_words)
+        
+    if possible_phrases:      
+        for i in range(len(email_list)):        
+            if email_list[i] in possible_phrases:                            
+                censor_bar = create_censor_bar(censored_email_list[i])
+                censored_email_list[i] = censor_bar
+                censor_bar = create_censor_bar(censored_email_list[i-1])
+                censored_email_list[i-1] = censor_bar
+                censor_bar = create_censor_bar(censored_email_list[i+1])
+                censored_email_list[i+1] = censor_bar                   
+
+    if possible_words:        
+        counter = 0        
+        for i in range(len(email_list)):
+            if email_list[i] in possible_words:
+                counter += 1
+                #print("Negative word found!  >> " + email_list[i])
+                #print("Counter is now >> " + str(counter))                
+                if counter > 2:
+                    censor_bar = create_censor_bar(censored_email_list[i])
+                    censored_email_list[i] = censor_bar
+                    censor_bar = create_censor_bar(censored_email_list[i-1])
+                    censored_email_list[i-1] = censor_bar
+                    censor_bar = create_censor_bar(censored_email_list[i+1])
+                    censored_email_list[i+1] = censor_bar       
+    
+    censored_email = " ".join(censored_email_list)    
+    return censored_email
+
+email_four_censored = censor_email_extreme(email_four, phrases=phrases_to_censor, words=negative_words)
+print(email_four)
+print(email_four_censored)
+
 
 
 
